@@ -18,3 +18,12 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 # → http://127.0.0.1:8000/docs
 ```
+
+## Proyecto
+```bash
+📝 Descripción breve del proyecto
+
+Esta API desarrollada con FastAPI implementa un sistema CRUD completo para gestionar tareas (Task).
+Permite crear, listar, actualizar y eliminar tareas mediante endpoints REST, con validación de datos gracias a Pydantic y documentación automática en /docs.
+El almacenamiento se realiza en memoria, lo que la convierte en una base ideal para prácticas o proyectos educativos sobre APIs.
+```
