@@ -1,7 +1,6 @@
-# 📝 Guion Rápido para Explicar el Proyecto (FastAPI Tasks API)
+# 📝 (FastAPI Tasks API)
 
-## 1️⃣ Descripción general
-He desarrollado una API REST con **FastAPI** que gestiona tareas mediante un sistema **CRUD completo**.  
+## 1️⃣ Descripción general  
 La API permite crear, listar, actualizar y eliminar tareas, y además cuenta con persistencia en un archivo JSON y un frontend sencillo en HTML para interactuar con ella.
 
 ---
@@ -38,17 +37,6 @@ Cada operación modifica un archivo `data/tasks.json`, lo que significa que:
 
 Esto simula una base de datos ligera.
 
----
-
-## 5️⃣ Mejoras respecto al proyecto base
-El proyecto añade varias mejoras respecto al original:
-
-- Persistencia real en JSON  
-- Sistema de prioridades  
-- Filtros avanzados (búsqueda, prioridad, completadas)  
-- Endpoint especial `complete_all`  
-- Frontend `index.html` para interactuar sin herramientas externas  
-- Tests automáticos con pytest  
 
 ---
 
@@ -72,7 +60,3 @@ El proyecto usa pytest para validar:
 Esto asegura estabilidad y correctitud.
 
 ---
-
-## ⭐ Resumen final
-Es una API funcional, modular, documentada, con persistencia, pruebas automáticas y un frontend simple.  
-Perfecta como ejemplo educativo o como base para un proyecto más grande.
