@@ -14,17 +14,18 @@ En la terminal del Codespace, ejecuta:
 python -m venv .venv
 source .venv/bin/activate
 
-## 📦 3️⃣ Instalar dependencias
+## 📦 Instalar dependencias
 pip install -r requirements.txt
 
 
-## ▶️ 4️⃣ Ejecutar la API
+## ▶️  Ejecutar la API
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-## 📘 6️⃣ Probar la API en Swagger
+## 📘 Probar la API en Swagger
 /docs
 
-## 🧪 7️⃣ Ejecutar tests automáticos
+## 🧪 Ejecutar tests automáticos
 pytest -v
 
 ```bash
+
