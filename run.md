@@ -12,6 +12,7 @@ En la terminal del Codespace, ejecuta:
 
 
 python -m venv .venv
+
 source .venv/bin/activate
 
 ## 📦 Instalar dependencias
@@ -28,4 +29,5 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 pytest -v
 
 ```bash
+
 
