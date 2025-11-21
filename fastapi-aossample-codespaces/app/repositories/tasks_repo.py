@@ -5,10 +5,9 @@ import json
 
 from app.schemas.task import Task, TaskCreate, TaskUpdate
 
-# Carpeta raíz del proyecto (…/fastapi-aossample-codespaces)
-ROOT_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT_DIR / "data"
-DATA_FILE = DATA_DIR / "tasks.json"
+
+# Archivo donde se guardarán las tareas (relativo a la carpeta desde la que ejecutas uvicorn)
+DATA_FILE = Path("data") / "tasks.json"
 
 
 class TasksRepository:
@@ -25,20 +24,23 @@ class TasksRepository:
         try:
             raw = json.loads(DATA_FILE.read_text(encoding="utf-8"))
             for item in raw:
-                task = Task(**item)  # Pydantic convierte tipos (UUID, Enum…)
+                task = Task(**item)  # Pydantic convierte tipos (UUID, enums, etc.)
                 self._tasks[task.id] = task
+            print(f"[INFO] Cargadas {len(self._tasks)} tareas desde {DATA_FILE}")
         except Exception as e:
             print(f"[WARN] No se pudo cargar {DATA_FILE}: {e}")
 
     def _save_to_file(self) -> None:
         """Guarda las tareas actuales en data/tasks.json."""
         try:
-            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            # Crear carpeta data/ si no existe
+            DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
             data = [t.model_dump() for t in self._tasks.values()]
             DATA_FILE.write_text(
                 json.dumps(data, indent=2, default=str),
                 encoding="utf-8",
             )
+            print(f"[INFO] Guardadas {len(data)} tareas en {DATA_FILE}")
         except Exception as e:
             print(f"[WARN] No se pudo guardar en {DATA_FILE}: {e}")
 
