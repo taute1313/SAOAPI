@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task API - Frontend simple</title>
+</head>
+<body>
+  <h1>Task API</h1>
+
+  <section>
+    <h2>Crear nueva tarea</h2>
+    <form id="task-form">
+      <label>
+        Título:
+        <input type="text" id="title" required />
+      </label>
+      <br />
+      <label>
+        Descripción:
+        <input type="text" id="description" />
+      </label>
+      <br />
+      <label>
+        Prioridad:
+        <select id="priority">
+          <option value="low">Baja</option>
+          <option value="medium" selected>Media</option>
+          <option value="high">Alta</option>
+        </select>
+      </label>
+      <br />
+      <button type="submit">Crear tarea</button>
+    </form>
+  </section>
+
+  <hr />
+
+  <section>
+    <h2>Listado de tareas</h2>
+    <button id="reload">Recargar tareas</button>
+    <ul id="tasks-list"></ul>
+  </section>
+
+  <script>
+    const API_BASE = "/api/v1/tasks";
+
+    async function loadTasks() {
+      const res = await fetch(API_BASE + "/");
+      const tasks = await res.json();
+      const list = document.getElementById("tasks-list");
+      list.innerHTML = "";
+
+      tasks.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = `[${t.priority}] ${t.title} - ${t.completed ? "✅" : "⏳"}`;
+
+        const btnComplete = document.createElement("button");
+        btnComplete.textContent = "Completar";
+        btnComplete.onclick = async () => {
+          await fetch(`${API_BASE}/${t.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ completed: true })
+          });
+          loadTasks();
+        };
+
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "Borrar";
+        btnDelete.onclick = async () => {
+          await fetch(`${API_BASE}/${t.id}`, { method: "DELETE" });
+          loadTasks();
+        };
+
+        li.append(" ", btnComplete, " ", btnDelete);
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById("reload").onclick = loadTasks;
+
+    document.getElementById("task-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      const priority = document.getElementById("priority").value;
+
+      await fetch(API_BASE + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+          completed: false,
+          priority,
+          tags: []
+        })
+      });
+
+      e.target.reset();
+      loadTasks();
+    };
+
+    // Cargar al inicio
+    loadTasks();
+  </script>
+</body>
+</html>
