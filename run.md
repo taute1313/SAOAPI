@@ -10,7 +10,7 @@
 ## ⚙️ 2️⃣ Activar el entorno virtual
 En la terminal del Codespace, ejecuta:
 
-```bash
+
 python -m venv .venv
 source .venv/bin/activate
 
@@ -26,3 +26,5 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ## 🧪 7️⃣ Ejecutar tests automáticos
 pytest -v
+
+```bash
