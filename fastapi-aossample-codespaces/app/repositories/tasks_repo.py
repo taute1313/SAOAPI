@@ -1,42 +1,57 @@
 from typing import Dict, List, Optional
 from uuid import UUID
-from app.schemas.task import Task, TaskCreate, TaskUpdate
-import json
 from pathlib import Path
+import json
 
-DATA_FILE = Path("data/tasks.json")
+from app.schemas.task import Task, TaskCreate, TaskUpdate
+
+# Carpeta raíz del proyecto (…/fastapi-aossample-codespaces)
+ROOT_DIR = Path(__file__).resolve().parents[2]
+DATA_DIR = ROOT_DIR / "data"
+DATA_FILE = DATA_DIR / "tasks.json"
 
 
 class TasksRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         self._tasks: Dict[UUID, Task] = {}
         self._load_from_file()
 
-    # ---- Persistencia en JSON ----
+    # ------------ Persistencia en JSON ------------
+
     def _load_from_file(self) -> None:
+        """Carga las tareas desde data/tasks.json si existe."""
         if not DATA_FILE.exists():
             return
         try:
             raw = json.loads(DATA_FILE.read_text(encoding="utf-8"))
             for item in raw:
-                task = Task(**item)
+                task = Task(**item)  # Pydantic convierte tipos (UUID, Enum…)
                 self._tasks[task.id] = task
         except Exception as e:
             print(f"[WARN] No se pudo cargar {DATA_FILE}: {e}")
 
     def _save_to_file(self) -> None:
+        """Guarda las tareas actuales en data/tasks.json."""
         try:
-            # Convertimos los Task a dict (convertible a JSON)
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
             data = [t.model_dump() for t in self._tasks.values()]
-            DATA_FILE.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+            DATA_FILE.write_text(
+                json.dumps(data, indent=2, default=str),
+                encoding="utf-8",
+            )
         except Exception as e:
             print(f"[WARN] No se pudo guardar en {DATA_FILE}: {e}")
 
-    # ---- Métodos públicos ----
-    def list(self, skip: int = 0, limit: int = 50,
-             completed: Optional[bool] = None,
-             q: Optional[str] = None,
-             priority: Optional[str] = None) -> List[Task]:
+    # ------------ Operaciones públicas ------------
+
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 50,
+        completed: Optional[bool] = None,
+        q: Optional[str] = None,
+        priority: Optional[str] = None,
+    ) -> List[Task]:
         values = list(self._tasks.values())
 
         if completed is not None:
@@ -48,12 +63,13 @@ class TasksRepository:
         if q:
             q_low = q.lower()
             values = [
-                t for t in values
+                t
+                for t in values
                 if q_low in t.title.lower()
                 or (t.description and q_low in t.description.lower())
             ]
 
-        return values[skip: skip + limit]
+        return values[skip : skip + limit]
 
     def get(self, task_id: UUID) -> Optional[Task]:
         return self._tasks.get(task_id)
@@ -86,7 +102,6 @@ class TasksRepository:
             self._save_to_file()
         return deleted
 
-    # Extra: marcar todas como completadas
     def complete_all(self) -> int:
         count = 0
         for task_id, task in list(self._tasks.items()):
