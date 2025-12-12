@@ -46,15 +46,8 @@ class TasksRepository:
 
     # ------------ Operaciones públicas ------------
 
-    def list(
-        self,
-        skip: int = 0,
-        limit: int = 50,
-        completed: Optional[bool] = None,
-        q: Optional[str] = None,
-        priority: Optional[str] = None,
-    ) -> List[Task]:
-        values = list(self._tasks.values())
+    def list(self, owner_id: str, skip: int = 0, limit: int = 50, completed: Optional[bool] = None, q: Optional[str] = None, priority: Optional[str] = None) -> List[Task]:
+        values = [t for t in self._tasks.values() if t.owner_id == owner_id]
 
         if completed is not None:
             values = [t for t in values if t.completed == completed]
@@ -76,8 +69,10 @@ class TasksRepository:
     def get(self, task_id: UUID) -> Optional[Task]:
         return self._tasks.get(task_id)
 
-    def create(self, data: TaskCreate) -> Task:
-        task = Task(**data.model_dump())
+    def create(self, data: TaskCreate, owner_id: str) -> Task:
+        task_data = data.model_dump()
+        task_data["owner_id"] = owner_id # Asignar dueño
+        task = Task(**task_data)
         self._tasks[task.id] = task
         self._save_to_file()
         return task
