@@ -1,311 +1,185 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Manager Seguro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    /* --- VARIABLES & BASE --- */
-    :root {
-      --primary: #6366f1;
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --input-bg: rgba(0, 0, 0, 0.3);
-      --text-main: #f8fafc;
-      --danger: #ef4444;
-      --success: #10b981;
-    }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    
-    body {
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Tareas</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+            margin: 0;
+        }
+        .container { width: 100%; max-width: 500px; padding: 20px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { margin: 0; }
+        .btn-salir { background-color: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
 
-    .container {
-      width: 100%;
-      max-width: 500px;
-    }
+        /* Tarjeta del formulario */
+        .form-card {
+            background-color: #1e293b;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"], textarea, select {
+            width: 100%;
+            background-color: #0f172a;
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box; /* Importante para que no se salga del contenedor */
+        }
 
-    /* --- PANTALLAS (Login vs App) --- */
-    .screen { display: none; animation: fadeIn 0.5s ease; }
-    .screen.active { display: block; }
+        textarea {
+            resize: vertical; /* Permite cambiar tamaño verticalmente */
+            font-family: sans-serif;
+        }
 
-    /* --- COMPONENTES --- */
-    .glass-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
+        .actions { display: flex; gap: 10px; }
+        .btn-add {
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-add:hover { background-color: #4f46e5; }
 
-    h1, h2 { text-align: center; margin-bottom: 20px; font-weight: 600; }
-    
-    .input-group { margin-bottom: 15px; }
-    
-    input, select, button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: var(--input-bg);
-      color: white;
-      margin-top: 5px;
-      transition: 0.3s;
-    }
+        /* Lista de tareas */
+        .task-card {
+            background-color: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .task-info { flex-grow: 1; margin-right: 10px; }
+        .task-title { font-weight: bold; font-size: 1.1em; margin: 0; }
+        .task-desc { color: #94a3b8; font-size: 0.9em; margin: 4px 0 0 0; }
+        .priority-border { width: 4px; height: 40px; border-radius: 2px; margin-right: 12px; }
+        
+        .p-Alta { background-color: #ef4444; }
+        .p-Media { background-color: #f59e0b; }
+        .p-Baja { background-color: #10b981; }
 
-    input:focus { outline: none; border-color: var(--primary); background: rgba(0,0,0,0.5); }
-
-    button.btn-primary {
-      background: var(--primary);
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button.btn-primary:hover { filter: brightness(1.2); }
-
-    .btn-link {
-      background: none; border: none; color: #a5b4fc; 
-      cursor: pointer; text-decoration: underline; margin-top: 10px; font-size: 0.9rem;
-    }
-
-    /* --- LISTA DE TAREAS --- */
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .btn-logout { width: auto; background: var(--danger); padding: 8px 15px; font-size: 0.8rem; }
-
-    .task-card {
-      background: rgba(255,255,255,0.03);
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-left: 4px solid transparent;
-    }
-
-    .task-card.priority-high { border-left-color: var(--danger); }
-    .task-card.priority-medium { border-left-color: #f59e0b; }
-    .task-card.priority-low { border-left-color: var(--success); }
-
-    .task-card.completed { opacity: 0.5; text-decoration: line-through; }
-
-    .actions button { width: 30px; height: 30px; border-radius: 50%; padding: 0; margin-left: 5px; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-  </style>
+        .btn-icon {
+            width: 30px; height: 30px;
+            border-radius: 50%; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            margin-left: 5px; color: white;
+        }
+        .btn-check { background-color: #10b981; }
+        .btn-del { background-color: #ef4444; }
+        .completed { text-decoration: line-through; opacity: 0.6; }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    
-    <div id="auth-screen" class="screen active">
-      <div class="glass-card">
-        <h1 id="auth-title">Iniciar Sesión</h1>
-        <form id="auth-form">
-          <div class="input-group">
-            <input type="text" id="username" placeholder="Usuario" required />
-          </div>
-          <div class="input-group">
-            <input type="password" id="password" placeholder="Contraseña" required />
-          </div>
-          <button type="submit" class="btn-primary" id="auth-btn">Entrar</button>
-        </form>
-        <button class="btn-link" id="toggle-auth">¿No tienes cuenta? Regístrate</button>
-        <p id="auth-msg" style="color: var(--danger); text-align: center; margin-top: 10px; font-size: 0.9rem;"></p>
-      </div>
-    </div>
+<div class="container">
+    <header>
+        <h1>Mis Tareas</h1>
+        <button class="btn-salir">Salir</button>
+    </header>
 
-    <div id="app-screen" class="screen">
-      <div class="header-row">
-        <h2>Mis Tareas</h2>
-        <button class="btn-logout" onclick="logout()">Salir</button>
-      </div>
-
-      <form id="create-task-form" class="glass-card" style="margin-bottom: 20px;">
-        <input type="text" id="new-title" placeholder="Nueva tarea..." required />
-        <div style="display: flex; gap: 10px;">
-          <select id="new-priority">
-            <option value="low">Baja</option>
-            <option value="medium" selected>Media</option>
-            <option value="high">Alta</option>
-          </select>
-          <button type="submit" class="btn-primary">Añadir</button>
+    <div class="form-card">
+        <input type="text" id="titleInput" placeholder="Nueva tarea...">
+        <textarea id="descInput" rows="2" placeholder="Descripción (opcional)..."></textarea>
+        
+        <div class="actions">
+            <select id="priorityInput" style="width: 40%;">
+                <option value="Media">Media</option>
+                <option value="Alta">Alta</option>
+                <option value="Baja">Baja</option>
+            </select>
+            <button class="btn-add" onclick="addTask()">Añadir</button>
         </div>
-      </form>
-
-      <ul id="tasks-list"></ul>
     </div>
 
-  </div>
+    <div id="taskList">
+        </div>
+</div>
 
-  <script>
-    const API_BASE = "/api/v1";
-    let isLoginMode = true;
-    let token = localStorage.getItem("token");
-
-    // --- INICIALIZACIÓN ---
-    if (token) {
-      showApp();
-    } else {
-      showAuth();
-    }
-
-    // --- GESTIÓN DE VISTAS ---
-    function showAuth() {
-      document.getElementById('auth-screen').classList.add('active');
-      document.getElementById('app-screen').classList.remove('active');
-    }
-
-    function showApp() {
-      document.getElementById('auth-screen').classList.remove('active');
-      document.getElementById('app-screen').classList.add('active');
-      loadTasks(); // Cargar datos al entrar
-    }
-
-    // --- LÓGICA DE AUTENTICACIÓN ---
-    document.getElementById('toggle-auth').onclick = () => {
-      isLoginMode = !isLoginMode;
-      const title = document.getElementById('auth-title');
-      const btn = document.getElementById('auth-btn');
-      const toggle = document.getElementById('toggle-auth');
-      
-      if(isLoginMode) {
-        title.innerText = "Iniciar Sesión";
-        btn.innerText = "Entrar";
-        toggle.innerText = "¿No tienes cuenta? Regístrate";
-      } else {
-        title.innerText = "Crear Cuenta";
-        btn.innerText = "Registrarse";
-        toggle.innerText = "¿Ya tienes cuenta? Inicia sesión";
-      }
-    };
-
-    document.getElementById('auth-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
-      const msg = document.getElementById('auth-msg');
-      msg.innerText = "";
-
-      const endpoint = isLoginMode ? "/auth/login" : "/auth/register";
-
-      try {
-        const res = await fetch(API_BASE + endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: user, password: pass })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.detail || "Error en la petición");
-
-        if (isLoginMode) {
-          // Guardar token y entrar
-          token = data.access_token;
-          localStorage.setItem("token", token);
-          showApp();
-        } else {
-          // Registro exitoso, cambiar a login
-          alert("¡Cuenta creada! Ahora inicia sesión.");
-          document.getElementById('toggle-auth').click();
-        }
-      } catch (err) {
-        msg.innerText = err.message;
-      }
-    };
-
-    function logout() {
-      localStorage.removeItem("token");
-      token = null;
-      document.getElementById('username').value = "";
-      document.getElementById('password').value = "";
-      document.getElementById('tasks-list').innerHTML = "";
-      showAuth();
-    }
-
-    // --- LÓGICA DE TAREAS ---
-    
-    // Helper para incluir token
-    function authHeader() {
-      return { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      };
-    }
+<script>
+    const apiUrl = "/tasks";
 
     async function loadTasks() {
-      try {
-        const res = await fetch(API_BASE + "/tasks/", { headers: authHeader() });
-        if (res.status === 401) { logout(); return; } // Token expirado
-        
+        const res = await fetch(apiUrl);
         const tasks = await res.json();
-        const list = document.getElementById("tasks-list");
-        list.innerHTML = "";
-        
-        // Ordenar y renderizar
-        tasks.sort((a,b) => a.completed - b.completed);
-        
-        tasks.forEach(t => {
-          const li = document.createElement("li");
-          li.className = `task-card priority-${t.priority} ${t.completed ? 'completed' : ''}`;
-          li.innerHTML = `
-            <div>
-              <strong>${t.title}</strong>
-              <div style="font-size: 0.8rem; opacity: 0.7">${t.description || ''}</div>
-            </div>
-            <div class="actions">
-              ${!t.completed ? `<button onclick="completeTask('${t.id}')" style="background:#10b981">✓</button>` : ''}
-              <button onclick="deleteTask('${t.id}')" style="background:#ef4444">✕</button>
-            </div>
-          `;
-          list.appendChild(li);
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+
+        tasks.forEach(task => {
+            const div = document.createElement('div');
+            div.className = 'task-card';
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; flex-grow:1;">
+                    <div class="priority-border p-${task.priority}"></div>
+                    <div class="task-info">
+                        <p class="task-title ${task.completed ? 'completed' : ''}">${task.title}</p>
+                        <p class="task-desc">${task.description || ''}</p>
+                    </div>
+                </div>
+                <div style="display:flex;">
+                    <button class="btn-icon btn-check" onclick="toggleTask(${task.id})">✓</button>
+                    <button class="btn-icon btn-del" onclick="deleteTask(${task.id})">✕</button>
+                </div>
+            `;
+            list.appendChild(div);
         });
-      } catch (e) { console.error(e); }
     }
 
-    document.getElementById('create-task-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const title = document.getElementById('new-title').value;
-      const priority = document.getElementById('new-priority').value;
+    async function addTask() {
+        const title = document.getElementById('titleInput').value;
+        const desc = document.getElementById('descInput').value; // Capturar descripción
+        const priority = document.getElementById('priorityInput').value;
 
-      await fetch(API_BASE + "/tasks/", {
-        method: "POST",
-        headers: authHeader(),
-        body: JSON.stringify({ title, priority, completed: false, tags: [] })
-      });
-      
-      document.getElementById('new-title').value = "";
-      loadTasks();
-    };
+        if (!title) return alert("Escribe un título");
 
-    async function completeTask(id) {
-      await fetch(`${API_BASE}/tasks/${id}`, {
-        method: "PATCH",
-        headers: authHeader(),
-        body: JSON.stringify({ completed: true })
-      });
-      loadTasks();
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                title: title,
+                description: desc, // Enviar descripción
+                priority: priority,
+                completed: false
+            })
+        });
+
+        document.getElementById('titleInput').value = '';
+        document.getElementById('descInput').value = ''; // Limpiar campo
+        loadTasks();
     }
 
     async function deleteTask(id) {
-      await fetch(`${API_BASE}/tasks/${id}`, {
-        method: "DELETE",
-        headers: authHeader()
-      });
-      loadTasks();
+        await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        loadTasks();
     }
-  </script>
+
+    async function toggleTask(id) {
+        await fetch(`${apiUrl}/${id}/complete`, { method: 'PUT' });
+        loadTasks();
+    }
+
+    // Cargar al iniciar
+    loadTasks();
+</script>
+
 </body>
 </html>
