@@ -5,17 +5,14 @@ from uuid import UUID
 from app.schemas.task import Task, TaskCreate, TaskUpdate, Priority
 from app.repositories.tasks_repo import repo
 
+from app.api.v1.endpoints.auth import get_current_user
+from app.repositories.users_repo import User
+
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 @router.get("/", response_model=List[Task])
-async def list_tasks(
-    skip: int = 0,
-    limit: int = 50,
-    completed: Optional[bool] = None,
-    q: Optional[str] = None,
-    priority: Optional[Priority] = None,
-):
+async def list_tasks(skip: int = 0,limit: int = 50,completed: Optional[bool] = None,q: Optional[str] = None,priority: Optional[Priority] = None,current_user: User = Depends(get_current_user)):
     """
     Lista tareas con filtros opcionales:
     - completed: true/false
@@ -23,6 +20,7 @@ async def list_tasks(
     - priority: low | medium | high
     """
     return repo.list(
+        owner_id=current_user.id,
         skip=skip,
         limit=limit,
         completed=completed,
@@ -32,11 +30,11 @@ async def list_tasks(
 
 
 @router.post("/", response_model=Task, status_code=status.HTTP_201_CREATED)
-async def create_task(payload: TaskCreate):
+async def create_task(payload: TaskCreate,current_user: User = Depends(get_current_user)):
     """
     Crea una nueva tarea.
     """
-    return repo.create(payload)
+    return repo.create(payload, owner_id=current_user.id)
 
 
 @router.get("/{task_id}", response_model=Task)
