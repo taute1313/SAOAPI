@@ -2,82 +2,277 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Task API - Frontend simple</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* --- VARIABLES & RESET --- */
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg-gradient: linear-gradient(135deg, #1e1e2e 0%, #2d2b42 100%);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* --- LAYOUT PRINCIPAL --- */
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      letter-spacing: -1px;
+    }
+
+    /* --- FORMULARIO (Glassmorphism) --- */
+    .input-group {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: rgba(0,0,0,0.2);
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(0,0,0,0.4);
+    }
+
+    button.btn-primary {
+      background: var(--primary);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    /* --- LISTA DE TAREAS --- */
+    ul { list-style: none; }
+
+    .task-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.4s ease-out forwards;
+      transition: transform 0.2s, opacity 0.3s;
+    }
+
+    .task-card:hover {
+      transform: scale(1.01);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .task-info h3 {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .task-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* --- BADGES (Prioridad) --- */
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .badge.high { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .badge.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .badge.low { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+    /* --- BOTONES DE ACCIÓN --- */
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: background 0.2s;
+    }
+
+    .btn-check:hover { background: var(--success); color: white; }
+    .btn-delete:hover { background: var(--danger); color: white; }
+
+    /* --- ESTADO COMPLETADO --- */
+    .task-card.completed {
+      opacity: 0.6;
+      border-left: 4px solid var(--success);
+    }
+    .task-card.completed h3 { text-decoration: line-through; }
+
+    /* --- ANIMACIONES --- */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateX(50px); }
+    }
+
+    .deleting {
+      animation: fadeOut 0.4s forwards;
+    }
+  </style>
 </head>
 <body>
-  <h1>Task API</h1>
 
-  <section>
-    <h2>Crear nueva tarea</h2>
-    <form id="task-form">
-      <label>
-        Título:
-        <input type="text" id="title" required />
-      </label>
-      <br />
-      <label>
-        Descripción:
-        <input type="text" id="description" />
-      </label>
-      <br />
-      <label>
-        Prioridad:
+  <div class="container">
+    <h1>⚡ Task Manager</h1>
+
+    <form id="task-form" class="input-group">
+      <input type="text" id="title" placeholder="¿Qué necesitas hacer hoy?" required />
+      <input type="text" id="description" placeholder="Descripción breve (opcional)" />
+      
+      <div style="display: flex; gap: 10px;">
         <select id="priority">
-          <option value="low">Baja</option>
-          <option value="medium" selected>Media</option>
-          <option value="high">Alta</option>
+          <option value="low">🟢 Prioridad Baja</option>
+          <option value="medium" selected>🟠 Prioridad Media</option>
+          <option value="high">🔴 Prioridad Alta</option>
         </select>
-      </label>
-      <br />
-      <button type="submit">Crear tarea</button>
+        <button type="submit" class="btn-primary">Crear Tarea</button>
+      </div>
     </form>
-  </section>
 
-  <hr />
-
-  <section>
-    <h2>Listado de tareas</h2>
-    <button id="reload">Recargar tareas</button>
-    <ul id="tasks-list"></ul>
-  </section>
+    <ul id="tasks-list">
+      </ul>
+  </div>
 
   <script>
+    // Apunta a la ruta relativa (el middleware Node se encarga del resto)
     const API_BASE = "/api/v1/tasks";
 
     async function loadTasks() {
-      const res = await fetch(API_BASE + "/");
-      const tasks = await res.json();
-      const list = document.getElementById("tasks-list");
-      list.innerHTML = "";
+      try {
+        const res = await fetch(API_BASE + "/");
+        const tasks = await res.json();
+        const list = document.getElementById("tasks-list");
+        list.innerHTML = ""; // Limpiar lista
 
-      tasks.forEach(t => {
-        const li = document.createElement("li");
-        li.textContent = `[${t.priority}] ${t.title} - ${t.completed ? "✅" : "⏳"}`;
+        // Ordenar: No completadas primero
+        tasks.sort((a, b) => a.completed - b.completed);
 
-        const btnComplete = document.createElement("button");
-        btnComplete.textContent = "Completar";
-        btnComplete.onclick = async () => {
-          await fetch(`${API_BASE}/${t.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ completed: true })
-          });
-          loadTasks();
-        };
-
-        const btnDelete = document.createElement("button");
-        btnDelete.textContent = "Borrar";
-        btnDelete.onclick = async () => {
-          await fetch(`${API_BASE}/${t.id}`, { method: "DELETE" });
-          loadTasks();
-        };
-
-        li.append(" ", btnComplete, " ", btnDelete);
-        list.appendChild(li);
-      });
+        tasks.forEach(t => {
+          const li = document.createElement("li");
+          li.className = `task-card ${t.completed ? 'completed' : ''}`;
+          
+          // HTML interno de la tarjeta
+          li.innerHTML = `
+            <div class="task-info">
+              <h3>
+                ${t.title} 
+                <span class="badge ${t.priority}">${translatePriority(t.priority)}</span>
+              </h3>
+              <p class="task-desc">${t.description || 'Sin descripción'}</p>
+            </div>
+            <div class="actions">
+              ${!t.completed ? `
+                <button class="btn-icon btn-check" title="Completar" onclick="completeTask('${t.id}')">
+                  ✓
+                </button>
+              ` : ''}
+              <button class="btn-icon btn-delete" title="Borrar" onclick="deleteTask('${t.id}', this)">
+                ✕
+              </button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error cargando tareas:", error);
+      }
     }
 
-    document.getElementById("reload").onclick = loadTasks;
+    function translatePriority(p) {
+      if(p === 'low') return 'Baja';
+      if(p === 'high') return 'Alta';
+      return 'Media';
+    }
+
+    async function completeTask(id) {
+      await fetch(`${API_BASE}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: true })
+      });
+      loadTasks();
+    }
+
+    async function deleteTask(id, btnElement) {
+      // Animación de salida antes de borrar
+      const card = btnElement.closest('.task-card');
+      card.classList.add('deleting');
+      
+      // Esperar a que termine la animación (400ms) antes de llamar a la API
+      setTimeout(async () => {
+        await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+        loadTasks();
+      }, 400);
+    }
 
     document.getElementById("task-form").onsubmit = async (e) => {
       e.preventDefault();
