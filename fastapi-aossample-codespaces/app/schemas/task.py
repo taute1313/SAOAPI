@@ -35,3 +35,4 @@ class TaskUpdate(BaseModel):
 
 class Task(TaskBase):
     id: UUID = Field(default_factory=uuid4)
+    owner_id: str = None  # Nuevo campo
